@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CRABOOM - Bitácora de Producción</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['Montserrat', 'sans-serif'],
+                    },
+                    colors: {
+                        craboom: {
+                            DEFAULT: '#ff3b3b',
+                            hover: '#ff5c5c',
+                            dark: '#cc2f2f'
+                        },
+                        dark: {
+                            bg: '#121212',
+                            card: '#1e1e1e',
+                            border: '#333333'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #121212;
+            color: #ffffff;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        /* Custom Checkbox Styling */
+        .cbx {
+            -webkit-user-select: none;
+            user-select: none;
+            cursor: pointer;
+        }
+        .cbx span {
+            display: inline-block;
+            vertical-align: middle;
+            transform: translate3d(0, 0, 0);
+        }
+        .cbx span:first-child {
+            position: relative;
+            width: 24px;
+            height: 24px;
+            border-radius: 6px;
+            transform: scale(1);
+            vertical-align: middle;
+            border: 2px solid #555;
+            transition: all 0.2s ease;
+            background: #121212;
+        }
+        .cbx span:first-child svg {
+            position: absolute;
+            top: 4px;
+            left: 3px;
+            fill: none;
+            stroke: #ffffff;
+            stroke-width: 2.5;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            stroke-dasharray: 16px;
+            stroke-dashoffset: 16px;
+            transition: all 0.3s ease;
+            transition-delay: 0.1s;
+            transform: translate3d(0, 0, 0);
+        }
+        .cbx span:last-child {
+            padding-left: 12px;
+            line-height: 24px;
+            font-size: 1rem;
+            color: #d1d5db;
+            transition: color 0.2s ease;
+        }
+        .cbx:hover span:first-child {
+            border-color: #ff3b3b;
+        }
+        .inp-cbx:checked + .cbx span:first-child {
+            background: #ff3b3b;
+            border-color: #ff3b3b;
+            animation: wave-4 0.4s ease;
+        }
+        .inp-cbx:checked + .cbx span:first-child svg {
+            stroke-dashoffset: 0;
+        }
+        .inp-cbx:checked + .cbx span:last-child {
+            color: #ffffff;
+            text-decoration: line-through;
+            opacity: 0.7;
+        }
+        @keyframes wave-4 {
+            50% { transform: scale(0.9); }
+        }
+
+        /* Input Date/Time Icon Invert */
+        ::-webkit-calendar-picker-indicator {
+            filter: invert(1);
+            cursor: pointer;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #121212; }
+        ::-webkit-scrollbar-thumb { background: #333333; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #ff3b3b; }
+        
+        /* Details marker hide */
+        details > summary { list-style: none; }
+        details > summary::-webkit-details-marker { display: none; }
+    </style>
+</head>
+<body class="min-h-screen pb-24">
+
+    <!-- Header -->
+    <header class="bg-dark-bg border-b border-dark-border sticky top-0 z-30 shadow-lg">
+        <div class="max-w-5xl mx-auto px-4 py-6 text-center">
+            <h1 class="font-display font-black text-3xl md:text-5xl tracking-tight" style="text-shadow: 0 0 25px rgba(255,59,59,0.4);">
+                <span class="text-craboom">CRABOOM</span> <br class="md:hidden" />
+                <span class="text-white">- Bitácora de Producción</span>
+            </h1>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-5xl mx-auto px-4 py-8 space-y-10">
+
+        <!-- 1. Datos Generales -->
+        <section class="bg-dark-card rounded-2xl p-6 shadow-xl border border-dark-border">
+            <h2 class="font-display font-bold text-2xl mb-6 flex items-center space-x-3 text-white border-b border-dark-border pb-4">
+                <svg class="w-6 h-6 text-craboom" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                <span>Datos Generales</span>
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label class="block text-sm font-semibold text-gray-400 mb-2 uppercase tracking-wider">Proyecto / Cliente</label>
+                    <input type="text" id="inp-proyecto" class="w-full bg-dark-bg border border-dark-border rounded-xl px-5 py-4 text-white text-lg focus:outline-none focus:border-craboom focus:ring-1 focus:ring-craboom transition-all" placeholder="Ej. Comercial Navidad - Marca X" oninput="saveState()">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-400 mb-2 uppercase tracking-wider">Fecha</label>
+                    <input type="date" id="inp-fecha" class="w-full bg-dark-bg border border-dark-border rounded-xl px-5 py-4 text-white text-lg focus:outline-none focus:border-craboom focus:ring-1 focus:ring-craboom transition-all" onchange="saveState()">
+                </div>
+            </div>
+        </section>
+
+        <!-- 2. Control de Tiempos -->
+        <section class="bg-dark-card rounded-2xl p-6 shadow-xl border border-dark-border">
+            <h2 class="font-display font-bold text-2xl mb-6 flex items-center space-x-3 text-white border-b border-dark-border pb-4">
+                <svg class="w-6 h-6 text-craboom" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <span>Control de Tiempos</span>
+            </h2>
+            <div class="space-y-6">
+                
+                <!-- Montaje -->
+                <div class="bg-dark-bg p-5 rounded-xl border border-dark-border space-y-4">
+                    <span class="font-bold text-xl text-white block border-b border-dark-border pb-2">1. Montaje</span>
+                    <div class="flex flex-col md:flex-row gap-4">
+                        <div class="flex-1 flex items-center space-x-2">
+                            <span class="text-sm font-semibold text-gray-400 w-16">INICIO:</span>
+                            <input type="time" id="time-montaje-start" class="bg-dark-card text-white px-3 py-2 rounded-lg border border-dark-border focus:border-craboom outline-none text-base flex-1" onchange="saveState()">
+                            <button onclick="setNow('montaje', 'start')" class="bg-dark-border hover:bg-emerald-600 hover:border-emerald-500 text-white px-3 py-2 rounded-lg font-bold transition-colors active:scale-95 text-sm">Iniciar</button>
+                        </div>
+                        <div class="flex-1 flex items-center space-x-2">
+                            <span class="text-sm font-semibold text-gray-400 w-16">FIN:</span>
+                            <input type="time" id="time-montaje-end" class="bg-dark-card text-white px-3 py-2 rounded-lg border border-dark-border focus:border-craboom outline-none text-base flex-1" onchange="saveState()">
+                            <button onclick="setNow('montaje', 'end')" class="bg-dark-border hover:bg-craboom hover:border-craboom text-white px-3 py-2 rounded-lg font-bold transition-colors active:scale-95 text-sm">Finalizar</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Rodaje -->
+                <div class="bg-dark-bg p-5 rounded-xl border border-dark-border space-y-4">
+                    <span class="font-bold text-xl text-white block border-b border-dark-border pb-2">2. Rodaje</span>
+                    <div class="flex flex-col md:flex-row gap-4">
+                        <div class="flex-1 flex items-center space-x-2">
+                            <span class="text-sm font-semibold text-gray-400 w-16">INICIO:</span>
+                            <input type="time" id="time-rodaje-start" class="bg-dark-card text-white px-3 py-2 rounded-lg border border-dark-border focus:border-craboom outline-none text-base flex-1" onchange="saveState()">
+                            <button onclick="setNow('rodaje', 'start')" class="bg-dark-border hover:bg-emerald-600 hover:border-emerald-500 text-white px-3 py-2 rounded-lg font-bold transition-colors active:scale-95 text-sm">Iniciar</button>
+                        </div>
+                        <div class="flex-1 flex items-center space-x-2">
+                            <span class="text-sm font-semibold text-gray-400 w-16">FIN:</span>
+                            <input type="time" id="time-rodaje-end" class="bg-dark-card text-white px-3 py-2 rounded-lg border border-dark-border focus:border-craboom outline-none text-base flex-1" onchange="saveState()">
+                            <button onclick="setNow('rodaje', 'end')" class="bg-dark-border hover:bg-craboom hover:border-craboom text-white px-3 py-2 rounded-lg font-bold transition-colors active:scale-95 text-sm">Finalizar</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Desmontaje -->
+                <div class="bg-dark-bg p-5 rounded-xl border border-dark-border space-y-4">
+                    <span class="font-bold text-xl text-white block border-b border-dark-border pb-2">3. Desmontaje</span>
+                    <div class="flex flex-col md:flex-row gap-4">
+                        <div class="flex-1 flex items-center space-x-2">
+                            <span class="text-sm font-semibold text-gray-400 w-16">INICIO:</span>
+                            <input type="time" id="time-desmontaje-start" class="bg-dark-card text-white px-3 py-2 rounded-lg border border-dark-border focus:border-craboom outline-none text-base flex-1" onchange="saveState()">
+                            <button onclick="setNow('desmontaje', 'start')" class="bg-dark-border hover:bg-emerald-600 hover:border-emerald-500 text-white px-3 py-2 rounded-lg font-bold transition-colors active:scale-95 text-sm">Iniciar</button>
+                        </div>
+                        <div class="flex-1 flex items-center space-x-2">
+                            <span class="text-sm font-semibold text-gray-400 w-16">FIN:</span>
+                            <input type="time" id="time-desmontaje-end" class="bg-dark-card text-white px-3 py-2 rounded-lg border border-dark-border focus:border-craboom outline-none text-base flex-1" onchange="saveState()">
+                            <button onclick="setNow('desmontaje', 'end')" class="bg-dark-border hover:bg-craboom hover:border-craboom text-white px-3 py-2 rounded-lg font-bold transition-colors active:scale-95 text-sm">Finalizar</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Guardar Equipos -->
+                <div class="bg-dark-bg p-5 rounded-xl border border-dark-border space-y-4">
+                    <span class="font-bold text-xl text-white block border-b border-dark-border pb-2">4. Guardar Equipos</span>
+                    <div class="flex flex-col md:flex-row gap-4">
+                        <div class="flex-1 flex items-center space-x-2">
+                            <span class="text-sm font-semibold text-gray-400 w-16">INICIO:</span>
+                            <input type="time" id="time-guardar-start" class="bg-dark-card text-white px-3 py-2 rounded-lg border border-dark-border focus:border-craboom outline-none text-base flex-1" onchange="saveState()">
+                            <button onclick="setNow('guardar', 'start')" class="bg-dark-border hover:bg-emerald-600 hover:border-emerald-500 text-white px-3 py-2 rounded-lg font-bold transition-colors active:scale-95 text-sm">Iniciar</button>
+                        </div>
+                        <div class="flex-1 flex items-center space-x-2">
+                            <span class="text-sm font-semibold text-gray-400 w-16">FIN:</span>
+                            <input type="time" id="time-guardar-end" class="bg-dark-card text-white px-3 py-2 rounded-lg border border-dark-border focus:border-craboom outline-none text-base flex-1" onchange="saveState()">
+                            <button onclick="setNow('guardar', 'end')" class="bg-dark-border hover:bg-craboom hover:border-craboom text-white px-3 py-2 rounded-lg font-bold transition-colors active:scale-95 text-sm">Finalizar</button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- 3. Checklist de Equipos -->
+        <section>
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="font-display font-bold text-2xl flex items-center space-x-3 text-white">
+                    <svg class="w-6 h-6 text-craboom" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
+                    <span>Checklist de Equipos</span>
+                </h2>
+                <button onclick="checkAll()" class="text-sm font-semibold text-craboom hover:text-white transition-colors underline underline-offset-4">Seleccionar Todo</button>
+            </div>
+            
+            <div id="checklist-container" class="space-y-4">
+                <!-- Generado por JS -->
+            </div>
+        </section>
+
+        <!-- 4. Observaciones -->
+        <section class="bg-dark-card rounded-2xl p-6 shadow-xl border border-dark-border">
+            <h2 class="font-display font-bold text-2xl mb-6 flex items-center space-x-3 text-white border-b border-dark-border pb-4">
+                <svg class="w-6 h-6 text-craboom" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                <span>Observaciones</span>
+            </h2>
+            <div>
+                <textarea id="inp-observaciones" rows="4" class="w-full bg-dark-bg border border-dark-border rounded-xl px-5 py-4 text-white text-lg focus:outline-none focus:border-craboom focus:ring-1 focus:ring-craboom transition-all resize-y" placeholder="Añade detalles, incidencias o notas importantes aquí..." oninput="saveState()"></textarea>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Floating Action Bar -->
+    <div class="fixed bottom-0 left-0 w-full bg-dark-bg/90 backdrop-blur-md border-t border-dark-border p-4 z-40">
+        <div class="max-w-5xl mx-auto flex flex-wrap gap-3 justify-center md:justify-between items-center">
+            
+            <div class="flex gap-3 w-full md:w-auto">
+                <button onclick="saveToLocal()" class="flex-1 md:flex-none px-6 py-3 bg-dark-card hover:bg-dark-border border border-dark-border rounded-xl font-bold text-white transition-all shadow-lg flex items-center justify-center space-x-2">
+                    <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path></svg>
+                    <span>Guardar Local</span>
+                </button>
+                <button onclick="clearForm()" class="flex-1 md:flex-none px-6 py-3 bg-dark-card hover:bg-red-900/40 border border-dark-border hover:border-red-500/50 rounded-xl font-bold text-gray-400 hover:text-red-400 transition-all shadow-lg flex items-center justify-center space-x-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                    <span class="hidden md:inline">Limpiar</span>
+                </button>
+            </div>
+
+            <button onclick="exportData()" class="w-full md:w-auto px-8 py-4 bg-craboom hover:bg-craboom-hover text-white rounded-xl font-black text-lg transition-all shadow-[0_0_20px_rgba(255,59,59,0.3)] hover:shadow-[0_0_30px_rgba(255,59,59,0.5)] flex items-center justify-center space-x-2">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                <span>Exportar Resumen</span>
+            </button>
+            
+        </div>
+    </div>
+
+    <!-- Export Modal -->
+    <div id="modal-export" class="fixed inset-0 bg-black/90 backdrop-blur-sm z-50 hidden flex-col items-center justify-center p-4">
+        <div class="bg-dark-card border border-dark-border rounded-2xl w-full max-w-2xl shadow-2xl flex flex-col max-h-[90vh]">
+            <div class="p-6 border-b border-dark-border flex justify-between items-center">
+                <h3 class="font-display font-bold text-2xl text-white">Resumen de Producción</h3>
+                <button onclick="closeModal()" class="text-gray-400 hover:text-white p-2">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            <div class="p-4 overflow-y-auto flex-1">
+                <textarea id="export-text" readonly class="w-full h-80 bg-dark-bg border border-dark-border rounded-xl p-4 text-gray-300 font-mono text-sm focus:outline-none resize-none"></textarea>
+            </div>
+            <div class="p-6 border-t border-dark-border flex flex-col sm:flex-row justify-end gap-3">
+                <button onclick="closeModal()" class="px-6 py-3 bg-dark-border hover:bg-gray-700 text-white rounded-xl font-bold transition-colors">Cerrar</button>
+                <button onclick="downloadTxt()" class="px-6 py-3 bg-dark-bg border border-dark-border hover:border-craboom text-white rounded-xl font-bold transition-colors flex items-center justify-center space-x-2">
+                    <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                    <span>Descargar .txt</span>
+                </button>
+                <button onclick="copyToClipboard()" class="px-6 py-3 bg-craboom hover:bg-craboom-hover text-white rounded-xl font-bold shadow-[0_0_15px_rgba(255,59,59,0.3)] transition-colors flex items-center justify-center space-x-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
+                    <span>Copiar Texto</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed top-5 left-1/2 transform -translate-x-1/2 -translate-y-full opacity-0 transition-all duration-300 bg-emerald-600 text-white px-6 py-3 rounded-full shadow-2xl z-50 flex items-center space-x-2 font-bold pointer-events-none">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+        <span id="toast-msg">Guardado exitosamente</span>
+    </div>
+
+    <script>
+        // --- DATA INVENTORY ---
+        const INVENTORY = {
+            "BOLSO DE TELAS": [{"name": "Negra", "qty": 2}, {"name": "Amarilla", "qty": 1}],
+            "ILUMINACIÓN": [{"name": "ULANZI", "qty": 1}, {"name": "CARGADOR ULANZI", "qty": 1}, {"name": "LUZ DE COLORES", "qty": 1}, {"name": "Bombillas", "qty": 4}],
+            "EXTENSIONES": [{"name": "Negra grande", "qty": 1}, {"name": "Blanca corta", "qty": 1}, {"name": "Negra corta", "qty": 1}, {"name": "Regleta de 6 conectores", "qty": 1}],
+            "CINTAS": [{"name": "Contacto transparente", "qty": 1}, {"name": "Contacto blanca", "qty": 1}, {"name": "Masking verde", "qty": 1}, {"name": "Masking blanco", "qty": 1}, {"name": "Masking azul", "qty": 1}, {"name": "Tape transparente", "qty": 1}, {"name": "Adhesivo líquido", "qty": 1}],
+            "TRIPODES": [{"name": "Tripode Neepho grande", "qty": 1}, {"name": "Tripode pequeño", "qty": 1}],
+            "BOLSO PEQUEÑO": [{"name": "Power bank", "qty": 1}, {"name": "Bridas R/B/", "qty": 2}, {"name": "Navaja suiza", "qty": 1}],
+            "BOLSO ATOMIC": [{"name": "Delantales Atomic", "qty": 2}, {"name": "Guantes negros", "qty": 1}, {"name": "Micrófono negro inalámbrico funcional", "qty": 1}, {"name": "Antifaces", "qty": 2}, {"name": "Rondana", "qty": 1}],
+            "CASE RONIN Y DJI": [{"name": "Ronin RS3MINI", "qty": 1}, {"name": "Base tripié", "qty": 1}, {"name": "Pieza unión", "qty": 1}, {"name": "Pieza enganche a cámara", "qty": 1}, {"name": "Pieza horizontal", "qty": 1}, {"name": "Cable USB - Mini USB", "qty": 2}, {"name": "Cable Plus a Plus de doble anilla", "qty": 1}, {"name": "Clap de telefono", "qty": 2}, {"name": "BOLSITO DJI", "qty": 1}, {"name": "Cortavientos G/N/", "qty": 4}, {"name": "Cable de audio DJI", "qty": 1}, {"name": "ESTUCHE DE CARGA DJI", "qty": 1}, {"name": "Receptor", "qty": 1}, {"name": "Transmisores", "qty": 2}, {"name": "Cable pequeño de C a C", "qty": 1}, {"name": "Adaptador tipo C", "qty": 1}],
+            "BOLSO LINCO": [{"name": "Trípode de luces", "qty": 4}, {"name": "Trípode de manta", "qty": 2}, {"name": "Barras de trípode de manta", "qty": 3}, {"name": "Mantas B/N/G", "qty": 3}, {"name": "Prensador de manta", "qty": 4}, {"name": "Clips de cuerda", "qty": 4}, {"name": "TRIPODE PEQUEÑO.", "qty": 1}, {"name": "Eje.", "qty": 1}, {"name": "Clap de teléfono.", "qty": 1}, {"name": "Softbox y difusor.", "qty": 1}, {"name": "Sombrillas", "qty": 2}, {"name": "Cepos de bombillas", "qty": 4}],
+            "🎥 CÁMARA Y VIDEO": [{"name": "Cámara", "qty": 1}, {"name": "Memorias SD", "qty": 3}, {"name": "Baterías Cargadas", "qty": 4}, {"name": "Monitor / iPad de referencia", "qty": 1}, {"name": "BOLSITO CUADRADO", "qty": 1}, {"name": "Enganche a tripode Neepho", "qty": 1}, {"name": "Enganche a Ronin", "qty": 1}, {"name": "Cargador de batería de cámara", "qty": 1}, {"name": "Cargador múltiple de bateria de cámara", "qty": 1}]
+        };
+
+        // --- STATE MANAGEMENT ---
+        let appState = {
+            general: { proyecto: '', fecha: '', observaciones: '' },
+            times: { 
+                montaje: { start: '', end: '' },
+                rodaje: { start: '', end: '' },
+                desmontaje: { start: '', end: '' },
+                guardar: { start: '', end: '' }
+            },
+            checklist: {} // Format: { "Category": { "Item Name": { checked: false, qty: 1 } } }
+        };
+
+        function init() {
+            // Setup default checklist structure
+            for (let cat in INVENTORY) {
+                appState.checklist[cat] = {};
+                INVENTORY[cat].forEach(item => {
+                    appState.checklist[cat][item.name] = { checked: false, qty: item.qty };
+                });
+            }
+
+            // Load from LocalStorage
+            const saved = localStorage.getItem('craboom_bitacora');
+            if (saved) {
+                try {
+                    const parsed = JSON.parse(saved);
+                    
+                    // Safe migration loop for structure update
+                    if (parsed.times && parsed.times['time-montaje'] !== undefined) {
+                        parsed.times = {
+                            montaje: { start: parsed.times['time-montaje'] || '', end: '' },
+                            rodaje: { start: parsed.times['time-rodaje'] || '', end: '' },
+                            desmontaje: { start: parsed.times['time-desmontaje'] || '', end: '' },
+                            guardar: { start: '', end: '' }
+                        };
+                    }
+                    
+                    for (let cat in parsed.checklist) {
+                        for (let itemName in parsed.checklist[cat]) {
+                            if (typeof parsed.checklist[cat][itemName] === 'boolean') {
+                                const defItem = INVENTORY[cat]?.find(i => i.name === itemName);
+                                parsed.checklist[cat][itemName] = {
+                                    checked: parsed.checklist[cat][itemName],
+                                    qty: defItem ? defItem.qty : 1
+                                };
+                            }
+                        }
+                    }
+
+                    appState = { ...appState, ...parsed }; // Merge to keep structure
+                } catch(e) {}
+            } else {
+                // Set default Date to today
+                const today = new Date().toISOString().split('T')[0];
+                appState.general.fecha = today;
+            }
+
+            renderUI();
+        }
+
+        // --- RENDERING ---
+        function renderUI() {
+            // General
+            document.getElementById('inp-proyecto').value = appState.general.proyecto || '';
+            document.getElementById('inp-fecha').value = appState.general.fecha || '';
+            
+            const obsEl = document.getElementById('inp-observaciones');
+            if (obsEl) obsEl.value = appState.general.observaciones || '';
+
+            // Times
+            const procesos = ['montaje', 'rodaje', 'desmontaje', 'guardar'];
+            procesos.forEach(p => {
+                const elStart = document.getElementById(`time-${p}-start`);
+                const elEnd = document.getElementById(`time-${p}-end`);
+                if (elStart) elStart.value = appState.times[p]?.start || '';
+                if (elEnd) elEnd.value = appState.times[p]?.end || '';
+            });
+
+            // Checklist
+            const container = document.getElementById('checklist-container');
+            container.innerHTML = '';
+            
+            for (let cat in INVENTORY) {
+                // Create Collapsible Detail
+                const details = document.createElement('details');
+                details.className = "bg-dark-card rounded-2xl shadow-lg group border border-dark-border overflow-hidden";
+                details.open = true; // Open by default
+                
+                const summary = document.createElement('summary');
+                summary.className = "flex justify-between items-center font-bold text-lg md:text-xl cursor-pointer p-5 bg-dark-card hover:bg-[#252525] transition-colors outline-none text-white select-none";
+                summary.innerHTML = `
+                    <span>${cat}</span>
+                    <span class="transition-transform duration-300 group-open:rotate-180 text-gray-500">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </span>
+                `;
+                
+                const listGrid = document.createElement('div');
+                listGrid.className = "p-5 pt-2 grid grid-cols-1 md:grid-cols-2 gap-3 border-t border-dark-border bg-dark-bg/50";
+                
+                INVENTORY[cat].forEach((item, index) => {
+                    const id = `cb-${cat}-${index}`.replace(/[^a-zA-Z0-9]/g, '-');
+                    
+                    // State resolution
+                    const stateObj = appState.checklist[cat]?.[item.name] || { checked: false, qty: item.qty };
+                    const isChecked = stateObj.checked;
+                    const currentQty = stateObj.qty;
+                    
+                    const wrapper = document.createElement('div');
+                    wrapper.className = "flex flex-col sm:flex-row sm:items-center justify-between p-3 bg-dark-card rounded-xl border border-dark-border hover:bg-[#2a2a2a] transition-all gap-3";
+                    
+                    wrapper.innerHTML = `
+                        <label class="flex items-center cursor-pointer flex-1 w-full">
+                            <input type="checkbox" id="${id}" class="inp-cbx hidden" ${isChecked ? 'checked' : ''} onchange="toggleItem('${cat}', '${item.name}', this.checked)">
+                            <div class="cbx flex items-center w-full">
+                                <span>
+                                    <svg width="12px" height="10px" viewBox="0 0 12 10">
+                                        <polyline points="1.5 6 4.5 9 10.5 1"></polyline>
+                                    </svg>
+                                </span>
+                                <span class="ml-3 flex-1 text-sm md:text-base break-words">${item.name}</span>
+                            </div>
+                        </label>
+                        <div class="flex items-center space-x-2 bg-dark-bg rounded-lg p-1.5 border border-dark-border shadow-inner self-start sm:self-auto">
+                            <button onclick="updateQty('${cat}', '${item.name}', -1)" class="w-8 h-8 flex items-center justify-center rounded-md bg-dark-card hover:bg-dark-border text-gray-300 transition-colors font-bold text-lg leading-none active:scale-95 select-none" aria-label="Disminuir">-</button>
+                            <span class="w-8 text-center font-bold text-white text-sm">${currentQty}</span>
+                            <button onclick="updateQty('${cat}', '${item.name}', 1)" class="w-8 h-8 flex items-center justify-center rounded-md bg-dark-card hover:bg-craboom hover:text-white text-gray-300 transition-colors font-bold text-lg leading-none active:scale-95 select-none" aria-label="Aumentar">+</button>
+                        </div>
+                    `;
+                    listGrid.appendChild(wrapper);
+                });
+                
+                details.appendChild(summary);
+                details.appendChild(listGrid);
+                container.appendChild(details);
+            }
+        }
+
+        // --- ACTIONS ---
+        function setNow(proceso, tipo) {
+            const now = new Date();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const mins = String(now.getMinutes()).padStart(2, '0');
+            const timeStr = `${hours}:${mins}`;
+            
+            document.getElementById(`time-${proceso}-${tipo}`).value = timeStr;
+            saveState();
+        }
+
+        function updateQty(cat, itemName, delta) {
+            if (!appState.checklist[cat]) appState.checklist[cat] = {};
+            if (!appState.checklist[cat][itemName]) {
+                const defItem = INVENTORY[cat].find(i => i.name === itemName);
+                appState.checklist[cat][itemName] = { checked: false, qty: defItem ? defItem.qty : 0 };
+            }
+            
+            let newQty = appState.checklist[cat][itemName].qty + delta;
+            if (newQty < 0) newQty = 0; // Previene cantidades negativas
+            appState.checklist[cat][itemName].qty = newQty;
+            
+            saveState(false);
+            renderUI();
+        }
+
+        function toggleItem(cat, itemName, checked) {
+            if (!appState.checklist[cat]) appState.checklist[cat] = {};
+            if (!appState.checklist[cat][itemName]) {
+                const defItem = INVENTORY[cat].find(i => i.name === itemName);
+                appState.checklist[cat][itemName] = { checked: checked, qty: defItem ? defItem.qty : 0 };
+            } else {
+                appState.checklist[cat][itemName].checked = checked;
+            }
+            saveState(false); 
+        }
+
+        function checkAll() {
+            for (let cat in INVENTORY) {
+                INVENTORY[cat].forEach(item => {
+                    if (!appState.checklist[cat][item.name]) {
+                        appState.checklist[cat][item.name] = { checked: true, qty: item.qty };
+                    } else {
+                        appState.checklist[cat][item.name].checked = true;
+                    }
+                });
+            }
+            saveState(false);
+            renderUI();
+            showToast("Todos seleccionados");
+        }
+
+        function saveState(showNotif = false) {
+            // Update state from DOM
+            appState.general.proyecto = document.getElementById('inp-proyecto').value;
+            appState.general.fecha = document.getElementById('inp-fecha').value;
+            
+            const obsEl = document.getElementById('inp-observaciones');
+            if (obsEl) appState.general.observaciones = obsEl.value;
+            
+            const procesos = ['montaje', 'rodaje', 'desmontaje', 'guardar'];
+            procesos.forEach(p => {
+                const elStart = document.getElementById(`time-${p}-start`);
+                const elEnd = document.getElementById(`time-${p}-end`);
+                if (elStart && elEnd) {
+                    if(!appState.times[p]) appState.times[p] = {};
+                    appState.times[p].start = elStart.value;
+                    appState.times[p].end = elEnd.value;
+                }
+            });
+
+            localStorage.setItem('craboom_bitacora', JSON.stringify(appState));
+            
+            if (showNotif) {
+                showToast("Datos guardados en el navegador");
+            }
+        }
+
+        function saveToLocal() {
+            saveState(true);
+        }
+
+        function clearForm() {
+            let customConfirm = document.getElementById('toast-msg').innerText === '¿Seguro? Haz clic de nuevo en Limpiar.';
+            if (!customConfirm) {
+                showToast("¿Seguro? Haz clic de nuevo en Limpiar.", "warning");
+                return;
+            }
+
+            localStorage.removeItem('craboom_bitacora');
+            
+            // Reset state
+            appState.general.proyecto = '';
+            appState.general.observaciones = '';
+            appState.general.fecha = new Date().toISOString().split('T')[0];
+            appState.times = { 
+                montaje: { start: '', end: '' },
+                rodaje: { start: '', end: '' },
+                desmontaje: { start: '', end: '' },
+                guardar: { start: '', end: '' }
+            };
+            for (let cat in INVENTORY) {
+                appState.checklist[cat] = {};
+                INVENTORY[cat].forEach(item => {
+                    appState.checklist[cat][item.name] = { checked: false, qty: item.qty };
+                });
+            }
+            
+            renderUI();
+            showToast("Formulario limpiado");
+        }
+
+        // --- EXPORT LOGIC ---
+        function calcDuration(start, end) {
+            if (!start || !end) return '';
+            const [sH, sM] = start.split(':').map(Number);
+            const [eH, eM] = end.split(':').map(Number);
+            let sTotal = sH * 60 + sM;
+            let eTotal = eH * 60 + eM;
+            if (eTotal < sTotal) eTotal += 24 * 60; // Handle passing midnight
+            const diff = eTotal - sTotal;
+            const h = Math.floor(diff / 60);
+            const m = diff % 60;
+            return `(${h}h ${m}m)`;
+        }
+
+        function exportData() {
+            saveState(); // Ensure latest data
+            
+            let txt = `=================================\n`;
+            txt += ` CRABOOM - BITÁCORA DE PRODUCCIÓN \n`;
+            txt += `=================================\n\n`;
+            
+            txt += `PROYECTO/CLIENTE: ${appState.general.proyecto || 'Sin especificar'}\n`;
+            
+            // Format date nicely if valid
+            let fechaStr = appState.general.fecha;
+            if(fechaStr) {
+                const parts = fechaStr.split('-');
+                if(parts.length === 3) fechaStr = `${parts[2]}/${parts[1]}/${parts[0]}`;
+            }
+            txt += `FECHA: ${fechaStr || 'Sin especificar'}\n\n`;
+            
+            txt += `--- ⏱️ CONTROL DE TIEMPOS ---\n`;
+            const pNames = {montaje: 'Montaje', rodaje: 'Rodaje', desmontaje: 'Desmontaje', guardar: 'Guardado Equipos'};
+            for (let p in appState.times) {
+                let start = appState.times[p].start || '--:--';
+                let end = appState.times[p].end || '--:--';
+                let dur = calcDuration(appState.times[p].start, appState.times[p].end);
+                txt += `> ${pNames[p].padEnd(16)}: ${start} a ${end} ${dur}\n`;
+            }
+            txt += `\n`;
+            
+            txt += `--- 🎒 EQUIPOS LLEVADOS ---\n`;
+            
+            let totalEquipos = 0;
+            for (let cat in INVENTORY) {
+                // Filtrar solo los chequeados
+                let used = INVENTORY[cat].filter(item => appState.checklist[cat]?.[item.name]?.checked);
+                if (used.length > 0) {
+                    txt += `\n[ ${cat} ]\n`;
+                    used.forEach(u => {
+                        const stateQty = appState.checklist[cat]?.[u.name]?.qty ?? u.qty;
+                        txt += ` • ${u.name} (Cant: ${stateQty})\n`;
+                        totalEquipos++;
+                    });
+                }
+            }
+            
+            if(totalEquipos === 0) {
+                txt += `\n(No se marcó ningún equipo)\n`;
+            }
+
+            txt += `\n--- 📝 OBSERVACIONES ---\n`;
+            txt += `${appState.general.observaciones || 'Ninguna'}\n`;
+
+            document.getElementById('export-text').value = txt;
+            document.getElementById('modal-export').classList.remove('hidden');
+            document.getElementById('modal-export').classList.add('flex');
+            
+            // Prevent scrolling on body
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal() {
+            document.getElementById('modal-export').classList.add('hidden');
+            document.getElementById('modal-export').classList.remove('flex');
+            document.body.style.overflow = 'auto';
+        }
+
+        function copyToClipboard() {
+            const textarea = document.getElementById('export-text');
+            textarea.select();
+            textarea.setSelectionRange(0, 99999);
+            try {
+                document.execCommand('copy');
+                showToast("Copiado al portapapeles");
+            } catch (e) {
+                showToast("Error al copiar", "error");
+            }
+            textarea.setSelectionRange(0, 0); // Deselect
+        }
+
+        function downloadTxt() {
+            const txt = document.getElementById('export-text').value;
+            const blob = new Blob([txt], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            let pName = (appState.general.proyecto || 'Proyecto').replace(/[^a-zA-Z0-9]/g, '_');
+            a.download = `CRABOOM_${pName}_${appState.general.fecha || 'Fecha'}.txt`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        function showToast(msg, type = "success") {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-msg').innerText = msg;
+            
+            toast.className = 'fixed top-5 left-1/2 transform -translate-x-1/2 -translate-y-full opacity-0 transition-all duration-300 text-white px-6 py-3 rounded-full shadow-2xl z-[60] flex items-center space-x-2 font-bold pointer-events-none';
+            
+            if (type === "warning") toast.classList.add('bg-orange-500');
+            else if (type === "error") toast.classList.add('bg-red-600');
+            else toast.classList.add('bg-emerald-500');
+            
+            // Animate in
+            setTimeout(() => {
+                toast.classList.remove('-translate-y-full', 'opacity-0');
+                toast.classList.add('translate-y-0', 'opacity-100');
+            }, 10);
+            
+            // Hide after 3s
+            setTimeout(() => {
+                toast.classList.add('-translate-y-full', 'opacity-0');
+                toast.classList.remove('translate-y-0', 'opacity-100');
+            }, 3000);
+        }
+
+        // --- INIT ---
+        window.onload = init;
+
+    </script>
+</body>
+</html>
